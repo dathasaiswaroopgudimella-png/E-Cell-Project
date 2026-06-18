@@ -1,6 +1,11 @@
-import { jwtVerify } from 'jose';
+import { jwtVerify, createRemoteJWKSet } from 'jose';
 
-const jwtSecret = process.env.SUPABASE_JWT_SECRET || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+
+// Create a cached JWKS set from Supabase's well-known endpoint
+const JWKS = createRemoteJWKSet(
+  new URL(`${supabaseUrl}/auth/v1/.well-known/jwks.json`)
+);
 
 export interface DecodedToken {
   sub: string;
@@ -9,14 +14,15 @@ export interface DecodedToken {
 }
 
 export async function verifyJWT(token: string): Promise<DecodedToken | null> {
-  if (!jwtSecret) {
-    console.error('SUPABASE_JWT_SECRET is not configured.');
+  if (!supabaseUrl) {
+    console.error('NEXT_PUBLIC_SUPABASE_URL is not configured.');
     return null;
   }
 
   try {
-    const secret = new TextEncoder().encode(jwtSecret);
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: `${supabaseUrl}/auth/v1`,
+    });
     return payload as DecodedToken;
   } catch (error) {
     console.error('JWT verification error:', error);
