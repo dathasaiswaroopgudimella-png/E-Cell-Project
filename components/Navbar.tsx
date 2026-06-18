@@ -12,8 +12,14 @@ export default function Navbar() {
   const { logout, isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+    setSearchQuery(searchParams.get('search') || '');
+  }, [searchParams]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +41,7 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   };
 
-  const currentTag = searchParams.get('tag') || '';
+  const currentTag = mounted ? (searchParams.get('tag') || '') : '';
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
@@ -86,7 +92,30 @@ export default function Navbar() {
 
           {/* User Auth Buttons */}
           <div className="hidden sm:flex items-center gap-3">
-            {isAuthenticated ? (
+            {!mounted ? (
+              <>
+                <Link
+                  href="/upload"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition"
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  Upload
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-1 rounded-full px-3.5 py-2 text-xs font-medium text-slate-700 hover:text-slate-900 transition"
+                >
+                  <LogIn className="h-3.5 w-3.5 text-slate-500" />
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-full bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 transition"
+                >
+                  Register
+                </Link>
+              </>
+            ) : isAuthenticated ? (
               <>
                 <Link
                   href="/upload"
@@ -178,7 +207,35 @@ export default function Navbar() {
           <hr className="my-4 border-slate-100" />
 
           <div className="space-y-2">
-            {isAuthenticated ? (
+            {!mounted ? (
+              <div className="space-y-2">
+                <Link
+                  href="/upload"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload Presentation
+                </Link>
+                <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center rounded-md bg-slate-900 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                >
+                  Register
+                </Link>
+                </div>
+              </div>
+            ) : isAuthenticated ? (
               <>
                 <Link
                   href="/upload"
